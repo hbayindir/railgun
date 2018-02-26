@@ -1,0 +1,14 @@
+[logging]
+# Comment out next line to log to console.
+logfile = railgun.log
+
+[mailgun_api]
+base_uri = <enter_your_base_uri_here>
+api_key = <enter_your_api_key_here>
+
+[sender]
+name = john doe
+email_address = john@your_mailgun.domain
+
+[recipients]
+email_address = someone@somewhere.domain
