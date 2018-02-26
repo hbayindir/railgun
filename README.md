@@ -25,7 +25,7 @@ explanatory.
 ## Usage
 
 After setting up Railgun, usage is simple. Only required parameters are
-`subject` and `body`. `Body` can be multiline or HTML. Just pass as
+`subject` and `body`. `Body` can be multiline. Just pass as
 it is (Between quotations), and Mailgun will take care of the rest.
 
 Railgun can be invoked directly as `./railgun SUBJECT BODY`. Railgun
