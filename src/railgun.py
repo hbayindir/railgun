@@ -19,7 +19,7 @@ import requests # This is how we talk with MailGun API.
 
 # Some global constants. Change as you see fit.
 CONFIGURATION_FILE_PATH = '../conf/railgun.conf'
-LOGGING_LEVEL = logging.INFO
+LOGGING_LEVEL = logging.WARN
 
 # Below are mailgun configuation options.
 # Its modeled as a nested dictionary intentionally.
@@ -79,12 +79,41 @@ if __name__ == '__main__':
             except KeyError as exception:
                 pass
 
+    # Let's parse some arguments.
+    argumentParser = argparse.ArgumentParser()
+
+    argumentParser.add_argument ('subject', metavar = 'SUBJECT', help = 'Subject of the e-mail to be sent.')
+    argumentParser.add_argument ('body', metavar = 'BODY', help = 'Body of the e-mail to be sent.')
+    
+    verbosityGroup = argumentParser.add_mutually_exclusive_group()
+    verbosityGroup.add_argument ('-v', '--verbose', help = 'Print more detail about the process. Using more than one -v increases verbosity.', action = 'count')
+    verbosityGroup.add_argument ('-q', '--quiet', help = 'Do not print anything to console (overrides verbose).', action = 'store_true')
+
+    # Version always comes last.
+    argumentParser.add_argument ('-V', '--version', help = 'Print ' + argumentParser.prog + ' version and exit.', action = 'version', version = argumentParser.prog + ' version 1.0.1')    
+
+    arguments = argumentParser.parse_args()
+
+    if arguments.verbose == None:
+        arguments.verbose = 0;
+
+    # At this point we have the required arguments, let's start with logging duties.
+    if arguments.verbose != None :
+        if arguments.verbose == 1:
+            LOGGING_LEVEL = logging.INFO
+        elif arguments.verbose >= 2:
+            LOGGING_LEVEL = logging.DEBUG
+
     # Let's set the logger up.
     try:
         logging.basicConfig(filename = railgunOptions['logging']['log_file_path'], level = LOGGING_LEVEL, format = '%(levelname)s: %(message)s')
 
         # Get the local logger and start.
         localLogger = logging.getLogger('main')
+        
+        # Handle the quiet switch here, since it directly affects the logger.
+        if arguments.quiet == True:
+            logging.disable(logging.CRITICAL) # Critical is the highest built-in level. This line disables CRITICAL and below.
 
         localLogger.debug('Logger setup completed.')
         localLogger.debug('%s is starting.', sys.argv[0])
@@ -124,18 +153,6 @@ if __name__ == '__main__':
     localLogger.debug ('Logging file path: ' + str(railgunOptions['logging']['log_file_path']) + '.')
     localLogger.debug ('Sending mails as: ' + str(railgunOptions['sender']['name']) + ' <' + str(railgunOptions['sender']['email_address']) + '>.')
     localLogger.debug ('Sending mails to: ' + str(railgunOptions['recipients']['email_address']) + '.')
-
-    # Let's parse some arguments.
-    argumentParser = argparse.ArgumentParser()
-
-    argumentParser.add_argument ('subject', metavar = 'SUBJECT', help = 'Subject of the e-mail to be sent.')
-    argumentParser.add_argument ('body', metavar = 'BODY', help = 'Body of the e-mail to be sent.')
-
-    # Version always comes last.
-    argumentParser.add_argument ('-V', '--version', help = 'Print ' + argumentParser.prog + ' version and exit.', action = 'version', version = argumentParser.prog + ' version 1.0.0')    
-
-    arguments = argumentParser.parse_args()
-
 
     # Setting up the application is complete. Just send the mail now.
     request = sendSimpleMessage(arguments.subject, arguments.body)
