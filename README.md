@@ -9,11 +9,11 @@ All other dependencies are present in Python 3's standard library.
 
 ## Installation
 
-Railgun can be installed anywhere in your system. By default, the Configuration
+Railgun can be installed anywhere in your system. By default, the configuration
 file is searched under `../conf/railgun.conf` file, but this can be also changed
 from the beginning of the code.
 
-## Configuration
+## Configuration
 
 Railgun needs some configuration before becoming operational. Most of this
 configuration is related to MailGun itself. An example configuration file is
