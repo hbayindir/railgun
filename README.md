@@ -1,6 +1,6 @@
 # Railgun
 
-Railgun is a very simple tool to send emails using [Mailgun](https://www.mailgun.com) e-mail sending service.
+Railgun is a very simple tool to send emails using [Mailgun](https://www.mailgun.com) email sending service.
 
 ## Dependencies
 
