@@ -1,6 +1,6 @@
 # Railgun
 
-Railgun is a very simple tool to send emails using MailGun e-mail sending service.
+Railgun is a very simple tool to send emails using [Mailgun](https://www.mailgun.com) e-mail sending service.
 
 ## Dependencies
 
@@ -10,13 +10,13 @@ All other dependencies are present in Python 3's standard library.
 ## Installation
 
 Railgun can be installed anywhere in your system. By default, the configuration
-file is searched under `../conf/railgun.conf` file, but this can be also changed
+file is searched under `../conf/railgun.conf` file, but this can be changed
 from the beginning of the code.
 
 ## Configuration
 
 Railgun needs some configuration before becoming operational. Most of this
-configuration is related to MailGun itself. An example configuration file is
+configuration is related to Mailgun itself. An example configuration file is
 included in `conf/` folder with `railgun.conf.example` name.
 
 Copy the file as `railgun.conf` and fill the options. Options are self
@@ -26,7 +26,7 @@ explanatory.
 
 After setting up Railgun, usage is simple. Only required parameters are
 `subject` and `body`. `Body` can be multiline or HTML. Just pass as
-it is (Between quotations), and MailGun will take care of the rest.
+it is (Between quotations), and Mailgun will take care of the rest.
 
 Railgun can be invoked directly as `./railgun SUBJECT BODY`. Railgun
 will check whether its configuration is sane and will report any errors
