@@ -10,8 +10,8 @@ All other dependencies are present in Python 3's standard library.
 ## Installation
 
 Railgun can be installed anywhere in your system. By default, the Configuration
-file is searched under `../conf` file, but this can be also changed from the
-beginning of the code.
+file is searched under `../conf/railgun.conf` file, but this can be also changed
+from the beginning of the code.
 
 ## Configuration
 
