@@ -18,30 +18,53 @@ import requests # This is how we talk with MailGun API.
 
 
 # Some global constants. Change as you see fit.
-CONFIGURATION_FILE_PATH = '../conf/railgun.conf'
+DEFAULT_CONFIGURATION_FILE_PATH = '../conf/railgun.conf'
 LOGGING_LEVEL = logging.WARN
 
-# Below are mailgun configuation options.
-# Its modeled as a nested dictionary intentionally.
-# Only these keys will be queried from the file.
-# First, the logging options.
-railgunOptions = dict ()
-railgunOptions['logging'] = dict()
-railgunOptions['logging']['log_file_path'] = None
+# This is our new Railgun class, which allows the application to be used as a library too.
+class Railgun:
+    
+    # Let's put a small constructor here.
+    def __init__(self, configurationFilePath = DEFAULT_CONFIGURATION_FILE_PATH):
+        # Root dictionary.
+        self.options = dict ()
+        
+        # Logging options.
+        self.options['logging'] = dict ()
+        self.options['logging']['log_file_path'] = None
+        
+        # Mailgun API options.
+        self.options['mailgun_api'] = dict()
+        self.options['mailgun_api']['base_uri'] = None
+        self.options['mailgun_api']['api_key'] = None
+        
+        # Mailgun API sender options.
+        self.options['sender'] = dict()
+        self.options['sender']['name'] = None
+        self.options['sender']['email_address'] = None
 
-# MailGun API options.
-railgunOptions['mailgun_api'] = dict()
-railgunOptions['mailgun_api']['base_uri'] = None
-railgunOptions['mailgun_api']['api_key'] = None
-
-# MailGun API sender options.
-railgunOptions['sender'] = dict()
-railgunOptions['sender']['name'] = None
-railgunOptions['sender']['email_address'] = None
-
-# Mail recipient (one for now)
-railgunOptions['recipients'] = dict()
-railgunOptions['recipients']['email_address'] = None
+        # Mail recipient (one for now)
+        self.options['recipients'] = dict()
+        self.options['recipients']['email_address'] = None
+        
+        # Parse the configuration file here.
+        self.__parseConfigurationFile(configurationFilePath)
+    
+    def __parseConfigurationFile(self, configurationFilePath):
+        # Let's read this little file.
+        self.configuration = configparser.ConfigParser ()
+        self.configuration.read(DEFAULT_CONFIGURATION_FILE_PATH)
+    
+        # These loops iterate over the configuration options.
+        # This method is implemented to prevent code from attacks.
+        for sectionKey in self.options.keys ():
+            for optionKey in self.options[sectionKey].keys ():
+                try:
+                    self.options[sectionKey][optionKey] = self.configuration[sectionKey][optionKey]
+                # Handle missing keys gracefully here.
+                except KeyError as exception:
+                    pass
+    pass
 
 
 def sendSimpleMessage(subject, body):
@@ -61,23 +84,11 @@ if __name__ == '__main__':
 
     # Let's start with parsing the configuration file.
     # Check the file's existence first.
-    if os.path.isfile(CONFIGURATION_FILE_PATH) == False:
-        print ('FATAL: Configuration file ' + CONFIGURATION_FILE_PATH + ' is not present, exiting.', file = sys.stderr)
+    if os.path.isfile(DEFAULT_CONFIGURATION_FILE_PATH) == False:
+        print ('FATAL: Configuration file ' + DEFAULT_CONFIGURATION_FILE_PATH + ' is not present, exiting.', file = sys.stderr)
         sys.exit (1)
 
-    # Let's read this little file.
-    configuration = configparser.ConfigParser ()
-    configuration.read(CONFIGURATION_FILE_PATH)
-
-    # These loops iterate over the configuration options.
-    # This method is implemented to prevent code from attacks.
-    for sectionKey in railgunOptions.keys ():
-        for optionKey in railgunOptions[sectionKey].keys ():
-            try:
-                railgunOptions[sectionKey][optionKey] = configuration[sectionKey][optionKey]
-            # Handle missing keys gracefully here.
-            except KeyError as exception:
-                pass
+    railgun = Railgun ()
 
     # Let's parse some arguments.
     argumentParser = argparse.ArgumentParser()
