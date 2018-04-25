@@ -25,7 +25,7 @@ LOGGING_LEVEL = logging.WARN
 class Railgun:
     
     # Let's put a small constructor here.
-    def __init__(self, configurationFilePath = DEFAULT_CONFIGURATION_FILE_PATH):
+    def __init__ (self, configurationFilePath = DEFAULT_CONFIGURATION_FILE_PATH):
         # Root dictionary.
         self.options = dict ()
         
@@ -49,6 +49,7 @@ class Railgun:
         
         # Parse the configuration file here.
         self.__parseConfigurationFile(configurationFilePath)
+        self.__checkConfigurationSanity()
     
     def __parseConfigurationFile(self, configurationFilePath):
         # Let's read this little file.
@@ -64,7 +65,24 @@ class Railgun:
                 # Handle missing keys gracefully here.
                 except KeyError as exception:
                     pass
-    pass
+    
+    # This function checks whether the minimum requirements for railgun configuration is met.
+    def __checkConfigurationSanity (self):
+
+        if self.options['mailgun_api']['base_uri'] == None:
+            raise Exception ('base_uri value of [mailgun_api] section cannot be None or missing. Please obtain the value for your domain from Mail Gun dashboard.')
+    
+        if self.options['mailgun_api']['api_key'] == None:
+            raise Exception ('api_key value of [mailgun_api] section cannot be None or missing. Please obtain the value for your domain from Mail Gun dashboard.')
+    
+        if self.options['sender']['name'] == None:
+            raise Exception ('name value of [sender] section cannot be None or missing. Please fill this value with a descriptive name for the sender.')
+    
+        if self.options['sender']['email_address'] == None:
+            raise Exception ('email_address value of [sender] section cannot be None or missing. Please fill this value with a descriptive email address for the sender.')
+    
+        if self.options['recipients']['email_address'] == None:
+            raise Exception ('email_address value of [recipients] section cannot be None or missing. Please fill this value with the email address for the intended receiver of the email.')
 
 
 def sendTextEmail(subject, body, configuration):
@@ -88,7 +106,13 @@ if __name__ == '__main__':
         print ('FATAL: Configuration file ' + DEFAULT_CONFIGURATION_FILE_PATH + ' is not present, exiting.', file = sys.stderr)
         sys.exit (1)
 
-    railgun = Railgun ()
+    try:
+        railgun = Railgun ()
+    except Exception as exception:
+        print ('An exception has ocurred: ' + str(exception), file=sys.stderr)
+        print ('Please correct above errors and restart railgun.', file=sys.stderr)
+        sys.exit(1)
+        
 
     # Let's parse some arguments.
     argumentParser = argparse.ArgumentParser()
@@ -101,7 +125,7 @@ if __name__ == '__main__':
     verbosityGroup.add_argument ('-q', '--quiet', help = 'Do not print anything to console (overrides verbose).', action = 'store_true')
 
     # Version always comes last.
-    argumentParser.add_argument ('-V', '--version', help = 'Print ' + argumentParser.prog + ' version and exit.', action = 'version', version = argumentParser.prog + ' version 1.0.2')    
+    argumentParser.add_argument ('-V', '--version', help = 'Print ' + argumentParser.prog + ' version and exit.', action = 'version', version = argumentParser.prog + ' version 1.0.3')    
 
     arguments = argumentParser.parse_args()
 
@@ -131,33 +155,6 @@ if __name__ == '__main__':
     except IOError as exception:
         print ('Something about disk I/O went bad: ' + str(exception), file = sys.stderr)
         sys.exit(1)
-
-    # Let's make configuration sanity check. Some configuration options are mandatory. We cannot continue without them.
-    isConfigurationSane = True
-
-    if railgun.options['mailgun_api']['base_uri'] == None:
-        localLogger.critical ('base_uri value of [mailgun_api] section cannot be None or missing. Please obtain the value for your domain from Mail Gun dashboard.')
-        isConfigurationSane = False
-
-    if railgun.options['mailgun_api']['api_key'] == None:
-        localLogger.critical ('api_key value of [mailgun_api] section cannot be None or missing. Please obtain the value for your domain from Mail Gun dashboard.')
-        isConfigurationSane = False
-
-    if railgun.options['sender']['name'] == None:
-        localLogger.critical ('name value of [sender] section cannot be None or missing. Please fill this value with a descriptive name for the sender.')
-        isConfigurationSane = False
-
-    if railgun.options['sender']['email_address'] == None:
-        localLogger.critical ('email_address value of [sender] section cannot be None or missing. Please fill this value with a descriptive email address for the sender.')
-        isConfigurationSane = False
-
-    if railgun.options['recipients']['email_address'] == None:
-        localLogger.critical ('email_address value of [recipients] section cannot be None or missing. Please fill this value with the email address for the intended receiver of the email.')
-        isConfigurationSane = False
-
-    if isConfigurationSane == False:
-        localLogger.critical ('Please correct the configuration errors above and restart ' + sys.argv[0])
-        sys.exit (1)
 
     # Let's write some debugging information
     localLogger.debug ('Configuarion details:')
