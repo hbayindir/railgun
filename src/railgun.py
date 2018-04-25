@@ -67,15 +67,15 @@ class Railgun:
     pass
 
 
-def sendSimpleMessage(subject, body):
+def sendTextEmail(subject, body, configuration):
 
-    mailSender = railgunOptions['sender']['name'] + ' <' + railgunOptions['sender']['email_address'] + '>'
+    mailSender = configuration['sender']['name'] + ' <' + configuration['sender']['email_address'] + '>'
 
     return requests.post(
-        railgunOptions['mailgun_api']['base_uri'] + '/messages',
-        auth=('api', railgunOptions['mailgun_api']['api_key']),
+        configuration['mailgun_api']['base_uri'] + '/messages',
+        auth=('api', configuration['mailgun_api']['api_key']),
         data={'from': mailSender,
-              'to': railgunOptions['recipients']['email_address'],
+              'to': configuration['recipients']['email_address'],
               'subject': subject,
               'text': body})
 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     verbosityGroup.add_argument ('-q', '--quiet', help = 'Do not print anything to console (overrides verbose).', action = 'store_true')
 
     # Version always comes last.
-    argumentParser.add_argument ('-V', '--version', help = 'Print ' + argumentParser.prog + ' version and exit.', action = 'version', version = argumentParser.prog + ' version 1.0.1')    
+    argumentParser.add_argument ('-V', '--version', help = 'Print ' + argumentParser.prog + ' version and exit.', action = 'version', version = argumentParser.prog + ' version 1.0.2')    
 
     arguments = argumentParser.parse_args()
 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     # Let's set the logger up.
     try:
-        logging.basicConfig(filename = railgunOptions['logging']['log_file_path'], level = LOGGING_LEVEL, format = '%(levelname)s: %(message)s')
+        logging.basicConfig(filename = railgun.options['logging']['log_file_path'], level = LOGGING_LEVEL, format = '%(levelname)s: %(message)s')
 
         # Get the local logger and start.
         localLogger = logging.getLogger('main')
@@ -135,23 +135,23 @@ if __name__ == '__main__':
     # Let's make configuration sanity check. Some configuration options are mandatory. We cannot continue without them.
     isConfigurationSane = True
 
-    if railgunOptions['mailgun_api']['base_uri'] == None:
+    if railgun.options['mailgun_api']['base_uri'] == None:
         localLogger.critical ('base_uri value of [mailgun_api] section cannot be None or missing. Please obtain the value for your domain from Mail Gun dashboard.')
         isConfigurationSane = False
 
-    if railgunOptions['mailgun_api']['api_key'] == None:
+    if railgun.options['mailgun_api']['api_key'] == None:
         localLogger.critical ('api_key value of [mailgun_api] section cannot be None or missing. Please obtain the value for your domain from Mail Gun dashboard.')
         isConfigurationSane = False
 
-    if railgunOptions['sender']['name'] == None:
+    if railgun.options['sender']['name'] == None:
         localLogger.critical ('name value of [sender] section cannot be None or missing. Please fill this value with a descriptive name for the sender.')
         isConfigurationSane = False
 
-    if railgunOptions['sender']['email_address'] == None:
+    if railgun.options['sender']['email_address'] == None:
         localLogger.critical ('email_address value of [sender] section cannot be None or missing. Please fill this value with a descriptive email address for the sender.')
         isConfigurationSane = False
 
-    if railgunOptions['recipients']['email_address'] == None:
+    if railgun.options['recipients']['email_address'] == None:
         localLogger.critical ('email_address value of [recipients] section cannot be None or missing. Please fill this value with the email address for the intended receiver of the email.')
         isConfigurationSane = False
 
@@ -161,12 +161,12 @@ if __name__ == '__main__':
 
     # Let's write some debugging information
     localLogger.debug ('Configuarion details:')
-    localLogger.debug ('Logging file path: ' + str(railgunOptions['logging']['log_file_path']) + '.')
-    localLogger.debug ('Sending mails as: ' + str(railgunOptions['sender']['name']) + ' <' + str(railgunOptions['sender']['email_address']) + '>.')
-    localLogger.debug ('Sending mails to: ' + str(railgunOptions['recipients']['email_address']) + '.')
+    localLogger.debug ('Logging file path: ' + str(railgun.options['logging']['log_file_path']) + '.')
+    localLogger.debug ('Sending mails as: ' + str(railgun.options['sender']['name']) + ' <' + str(railgun.options['sender']['email_address']) + '>.')
+    localLogger.debug ('Sending mails to: ' + str(railgun.options['recipients']['email_address']) + '.')
 
     # Setting up the application is complete. Just send the mail now.
-    request = sendSimpleMessage(arguments.subject, arguments.body)
+    request = sendTextEmail(arguments.subject, arguments.body, railgun.options)
 
     if request.status_code == 200:
         localLogger.info ('The message has sent successfully.')
