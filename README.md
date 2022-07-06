@@ -1,5 +1,7 @@
 # Railgun
 
+**Important:** This repository has been migrated to [Source Hut](https://git.sr.ht/~bayindirh/railgun). This repository is archived for preservation purposes.
+
 Railgun is a very simple tool to send emails using [Mailgun](https://www.mailgun.com) email sending service.
 
 ## Dependencies
